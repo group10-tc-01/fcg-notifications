@@ -35,6 +35,17 @@ namespace FCG.Notifications.Infrastructure.Services
             _logger.LogInformation("Welcome email sent successfully to {Email}", userEmail);
         }
 
+        public async Task SendPaymentProcessedEmailAsync(string userEmail, bool isSuccessful, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("Sending payment processed email to {Email}", userEmail);
+
+            var template = new PaymentProcessedEmailTemplate(userEmail, isSuccessful);
+
+            await SendEmailAsync(userEmail, template, cancellationToken);
+
+            _logger.LogInformation("Payment processed email sent successfully to {Email}", userEmail);
+        }
+
         private async Task SendEmailAsync(string recipientEmail, IEmailTemplate template, CancellationToken cancellationToken)
         {
             var emailMessage = new EmailMessage(

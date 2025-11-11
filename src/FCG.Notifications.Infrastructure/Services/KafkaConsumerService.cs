@@ -17,7 +17,8 @@ namespace FCG.Notifications.Infrastructure.Services
         public KafkaConsumerService(
             IOptions<KafkaSettings> kafkaSettings,
             ILogger<KafkaConsumerService> logger,
-            string topic)
+            string topic,
+            string groupId)
         {
             _kafkaSettings = kafkaSettings.Value;
             _logger = logger;
@@ -26,7 +27,7 @@ namespace FCG.Notifications.Infrastructure.Services
             var config = new ConsumerConfig
             {
                 BootstrapServers = _kafkaSettings.BootstrapServers,
-                GroupId = _kafkaSettings.GroupId,
+                GroupId = groupId,
                 AutoOffsetReset = AutoOffsetReset.Earliest,
                 EnableAutoCommit = false,
                 EnableAutoOffsetStore = false
@@ -43,28 +44,45 @@ namespace FCG.Notifications.Infrastructure.Services
             _logger.LogInformation("Kafka consumer subscribed to topic: {Topic}", _topic);
         }
 
-        public ConsumeResult<string, string> ConsumeAsync(CancellationToken cancellationToken)
+        public async Task<ConsumeResult<string, string>?> ConsumeAsync(CancellationToken cancellationToken)
         {
-            var consumeResult = _consumer.Consume(cancellationToken);
-
-            if (consumeResult == null || consumeResult.IsPartitionEOF)
+            return await Task.Run(() =>
             {
-                return null!;
-            }
+                try
+                {
+                    using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                    timeoutCts.CancelAfter(TimeSpan.FromMilliseconds(_kafkaSettings.ConsumerTimeoutMs));
 
-            _logger.LogInformation(
-                "Consumed message from topic {Topic}, partition {Partition}, offset {Offset}",
-                consumeResult.Topic,
-                consumeResult.Partition.Value,
-                consumeResult.Offset.Value);
+                    var consumeResult = _consumer.Consume(timeoutCts.Token);
 
-            return consumeResult;
+                    if (consumeResult == null || consumeResult.IsPartitionEOF)
+                    {
+                        return null;
+                    }
+
+                    _logger.LogInformation(
+                        "Consumed message from topic {Topic}, partition {Partition}, offset {Offset}",
+                        consumeResult.Topic,
+                        consumeResult.Partition.Value,
+                        consumeResult.Offset.Value);
+
+                    return consumeResult;
+                }
+                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                {
+                    throw;
+                }
+                catch (OperationCanceledException)
+                {
+                    return null;
+                }
+            }, cancellationToken);
         }
 
         public void Commit(ConsumeResult<string, string> consumeResult)
         {
             _consumer.Commit(consumeResult);
-            
+
             _logger.LogDebug("Committed offset {Offset} for partition {Partition}",
                 consumeResult.Offset.Value,
                 consumeResult.Partition.Value);

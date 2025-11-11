@@ -1,9 +1,11 @@
 using FCG.Notifications.Infrastructure.ExceptionHandlers;
 using FCG.Notifications.Infrastructure.Interfaces;
 using FCG.Notifications.Infrastructure.Services;
+using FCG.Notifications.Infrastructure.Settings;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace FCG.Notifications.Infrastructure.BackgroundServices
 {
@@ -13,18 +15,21 @@ namespace FCG.Notifications.Infrastructure.BackgroundServices
         private readonly IServiceProvider _serviceProvider;
         private readonly GlobalExceptionHandler _exceptionHandler;
         private readonly ILogger<KafkaBackgroundService<TEvent>> _logger;
+        private readonly KafkaSettings _kafkaSettings;
         private readonly string _eventTypeName;
 
         public KafkaBackgroundService(
             KafkaConsumerService kafkaConsumerService,
             IServiceProvider serviceProvider,
             GlobalExceptionHandler exceptionHandler,
-            ILogger<KafkaBackgroundService<TEvent>> logger)
+            ILogger<KafkaBackgroundService<TEvent>> logger,
+            IOptions<KafkaSettings> kafkaSettings)
         {
             _kafkaConsumerService = kafkaConsumerService;
             _serviceProvider = serviceProvider;
             _exceptionHandler = exceptionHandler;
             _logger = logger;
+            _kafkaSettings = kafkaSettings.Value;
             _eventTypeName = typeof(TEvent).Name;
         }
 
@@ -34,36 +39,55 @@ namespace FCG.Notifications.Infrastructure.BackgroundServices
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                var consumeResult = _kafkaConsumerService.ConsumeAsync(stoppingToken);
-
-                if (consumeResult == null)
-                    continue;
-
-                var success = await _exceptionHandler.TryExecuteAsync(async () =>
+                try
                 {
-                    var eventData = _kafkaConsumerService.Deserialize<TEvent>(consumeResult.Message.Value);
+                    var consumeResult = await _kafkaConsumerService.ConsumeAsync(stoppingToken);
 
-                    _logger.LogInformation("Processing {EventType}", _eventTypeName);
+                    if (consumeResult == null)
+                    {
+                        await Task.Delay(TimeSpan.FromMilliseconds(GetPollingDelayMs()), stoppingToken);
+                        continue;
+                    }
 
-                    using var scope = _serviceProvider.CreateScope();
-                    var handler = scope.ServiceProvider.GetRequiredService<IKafkaEventHandler<TEvent>>();
-                    await handler.HandleAsync(eventData, stoppingToken);
+                    var success = await _exceptionHandler.TryExecuteAsync(async () =>
+                    {
+                        var eventData = _kafkaConsumerService.Deserialize<TEvent>(consumeResult.Message.Value);
 
-                }, $"Processing {_eventTypeName}", continueOnError: true);
+                        _logger.LogInformation("Processing {EventType}", _eventTypeName);
 
-                if (success)
-                {
-                    _kafkaConsumerService.Commit(consumeResult);
-                    _logger.LogInformation("Successfully processed and committed {EventType}", _eventTypeName);
+                        using var scope = _serviceProvider.CreateScope();
+                        var handler = scope.ServiceProvider.GetRequiredService<IKafkaEventHandler<TEvent>>();
+                        await handler.HandleAsync(eventData, stoppingToken);
+
+                    }, $"Processing {_eventTypeName}", continueOnError: true);
+
+                    if (success)
+                    {
+                        _kafkaConsumerService.Commit(consumeResult);
+                        _logger.LogInformation("Successfully processed and committed {EventType}", _eventTypeName);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Failed to process {EventType}. Message will be retried.", _eventTypeName);
+                    }
                 }
-
-                else
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
                 {
-                    _logger.LogWarning("Failed to process {EventType}. Message will be retried.", _eventTypeName);
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Unexpected error in Kafka Background Service for {EventType}", _eventTypeName);
+                    await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
                 }
             }
 
             _logger.LogInformation("Kafka Background Service stopping for {EventType}", _eventTypeName);
+        }
+
+        private int GetPollingDelayMs()
+        {
+            return _kafkaSettings.PollingDelayMs;
         }
 
         public override void Dispose()

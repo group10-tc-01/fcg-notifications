@@ -17,10 +17,10 @@ namespace FCG.Notifications.Infrastructure.Services
             _loggerFactory = loggerFactory;
         }
 
-        public KafkaConsumerService CreateConsumer(string topic)
+        public KafkaConsumerService CreateConsumer(string topic, string groupId)
         {
             var logger = _loggerFactory.CreateLogger<KafkaConsumerService>();
-            return new KafkaConsumerService(_kafkaSettings, logger, topic);
+            return new KafkaConsumerService(_kafkaSettings, logger, topic, groupId);
         }
     }
 }

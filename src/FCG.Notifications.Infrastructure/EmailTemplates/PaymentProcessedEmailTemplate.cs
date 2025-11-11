@@ -11,78 +11,76 @@ namespace FCG.Notifications.Infrastructure.EmailTemplates
             _isSuccessful = isSuccessful;
         }
 
-        protected override string Subject => _isSuccessful 
-            ? "Payment Confirmed - Transaction Successful" 
-            : "Payment Failed - Action Required";
+        protected override string Subject => _isSuccessful
+            ? "Pagamento Confirmado - Transação Bem-sucedida"
+            : "Pagamento Falhou - Ação Necessária";
 
-        protected override string BodyContent => _isSuccessful 
-            ? GetSuccessContent() 
+        protected override string BodyContent => _isSuccessful
+            ? GetSuccessContent()
             : GetFailureContent();
 
         private string GetSuccessContent()
         {
             return @"
-            <h2>Payment Successful! 💳✅</h2>
+            <h2>Pagamento Realizado com Sucesso! 💳✅</h2>
             
-            <p>Great news! Your payment has been processed successfully.</p>
+            <p>Ótima notícia! Seu pagamento foi processado com sucesso.</p>
             
             <div class=""highlight"" style=""background-color: #d4edda; border-left-color: #28a745;"">
-                <strong>Transaction Details</strong>
+                <strong>Detalhes da Transação</strong>
                 <ul>
-                    <li><strong>Status:</strong> <span style=""color: #28a745; font-weight: bold;"">Confirmed</span></li>
-                    <li><strong>Account:</strong> " + _userEmail + @"</li>
-                    <li><strong>Date:</strong> " + DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss UTC") + @"</li>
+                    <li><strong>Status:</strong> <span style=""color: #28a745; font-weight: bold;"">Confirmado</span></li>
+                    <li><strong>Conta:</strong> " + _userEmail + @"</li>
+                    <li><strong>Data:</strong> " + DateTime.UtcNow.ToString("dd/MM/yyyy HH:mm:ss UTC") + @"</li>
                 </ul>
             </div>
             
-            <p>You will receive a detailed receipt shortly.</p>
+            <p>Você receberá um recibo detalhado em breve.</p>
             
-            <p>Thank you for your business!</p>
+            <p>Obrigado por fazer negócios conosco!</p>
             
             <p style=""margin-top: 30px;"">
-                <strong>Best regards,</strong><br/>
-                The FCG Notifications Team
+                <strong>Atenciosamente,</strong><br/>
+                Equipe FCG Notifications
             </p>";
         }
 
         private string GetFailureContent()
         {
             return @"
-            <h2>Payment Failed ⚠️</h2>
+            <h2>Pagamento Falhou ⚠️</h2>
             
-            <p>Unfortunately, we were unable to process your payment.</p>
+            <p>Infelizmente, não conseguimos processar seu pagamento.</p>
             
             <div class=""highlight"" style=""background-color: #f8d7da; border-left-color: #dc3545;"">
-                <strong>Transaction Details</strong>
+                <strong>Detalhes da Transação</strong>
                 <ul>
-                    <li><strong>Status:</strong> <span style=""color: #dc3545; font-weight: bold;"">Failed</span></li>
-                    <li><strong>Account:</strong> " + _userEmail + @"</li>
-                    <li><strong>Date:</strong> " + DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss UTC") + @"</li>
+                    <li><strong>Status:</strong> <span style=""color: #dc3545; font-weight: bold;"">Falhou</span></li>
+                    <li><strong>Conta:</strong> " + _userEmail + @"</li>
+                    <li><strong>Data:</strong> " + DateTime.UtcNow.ToString("dd/MM/yyyy HH:mm:ss UTC") + @"</li>
                 </ul>
             </div>
             
-            <p><strong>Common reasons for payment failure:</strong></p>
+            <p><strong>Motivos comuns para falha no pagamento:</strong></p>
             <ul>
-                <li>Insufficient funds</li>
-                <li>Incorrect payment information</li>
-                <li>Card expired or blocked</li>
-                <li>Bank declined the transaction</li>
+                <li>Fundos insuficientes</li>
+                <li>Informações de pagamento incorretas</li>
+                <li>Cartão expirado ou bloqueado</li>
+                <li>Banco recusou a transação</li>
             </ul>
             
-            <p>Please verify your payment information and try again.</p>
-            
-            <a href=""#"" class=""button"" style=""background-color: #dc3545;"">Try Again</a>
+            <p>Por favor, verifique suas informações de pagamento e tente novamente.</p>
             
             <p style=""margin-top: 30px;"">
-                If you need assistance, please contact our support team.<br/>
-                <strong>Best regards,</strong><br/>
-                The FCG Notifications Team
+                Se precisar de assistência, entre em contato com nossa equipe de suporte.<br/>
+                <strong>Atenciosamente,</strong><br/>
+                Equipe FCG Notifications
             </p>";
         }
 
         protected override string GetHeaderTitle()
         {
-            return _isSuccessful ? "Payment Confirmed" : "Payment Failed";
+            return _isSuccessful ? "Pagamento Confirmado" : "Pagamento Falhou";
         }
 
         protected override string GetCssStyles()

@@ -27,8 +27,10 @@ namespace FCG.Notifications.Infrastructure.DependencyInjection
             services.AddScoped<IEmailService, EmailService>();
 
             services.AddScoped<IKafkaEventHandler<UserCreatedEvent>, UserCreatedEventHandler>();
-
             services.AddHostedService<UserCreatedKafkaBackgroundService>();
+
+            services.AddHostedService<PaymentProcessedKafkaBackgroundService>();
+            services.AddScoped<IKafkaEventHandler<PaymentProcessedEvent>, PaymentProcessedEventHandler>();
 
             services.AddSerilogLogging(configuration);
 

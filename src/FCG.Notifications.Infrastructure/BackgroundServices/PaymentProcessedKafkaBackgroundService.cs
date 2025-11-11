@@ -7,15 +7,15 @@ using Microsoft.Extensions.Options;
 
 namespace FCG.Notifications.Infrastructure.BackgroundServices
 {
-    public class UserCreatedKafkaBackgroundService : KafkaBackgroundService<UserCreatedEvent>
+    public class PaymentProcessedKafkaBackgroundService : KafkaBackgroundService<PaymentProcessedEvent>
     {
-        public UserCreatedKafkaBackgroundService(
+        public PaymentProcessedKafkaBackgroundService(
             KafkaConsumerFactory consumerFactory,
             IOptions<KafkaSettings> kafkaSettings,
             IServiceProvider serviceProvider,
             GlobalExceptionHandler exceptionHandler,
-            ILogger<KafkaBackgroundService<UserCreatedEvent>> logger)
-            : base(consumerFactory.CreateConsumer(kafkaSettings.Value.UserCreatedTopic, kafkaSettings.Value.UserCreatedGroupId), serviceProvider, exceptionHandler, logger, kafkaSettings)
+            ILogger<KafkaBackgroundService<PaymentProcessedEvent>> logger)
+            : base(consumerFactory.CreateConsumer(kafkaSettings.Value.PaymentProcessedTopic, kafkaSettings.Value.PaymentProcessedGroupId), serviceProvider, exceptionHandler, logger, kafkaSettings)
         {
         }
     }
