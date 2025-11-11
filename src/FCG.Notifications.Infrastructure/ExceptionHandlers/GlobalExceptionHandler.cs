@@ -1,10 +1,8 @@
 using FCG.Notifications.Domain.Exceptions;
 using Microsoft.Extensions.Logging;
-using System.Diagnostics.CodeAnalysis;
 
 namespace FCG.Notifications.Infrastructure.ExceptionHandlers
 {
-    [ExcludeFromCodeCoverage]
     public class GlobalExceptionHandler
     {
         private readonly ILogger<GlobalExceptionHandler> _logger;
