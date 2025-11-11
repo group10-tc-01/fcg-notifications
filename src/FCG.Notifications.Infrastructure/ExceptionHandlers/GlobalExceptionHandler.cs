@@ -27,6 +27,26 @@ namespace FCG.Notifications.Infrastructure.ExceptionHandlers
             HandleGenericException(exception, context, exceptionId);
         }
 
+        public async Task<bool> TryExecuteAsync(Func<Task> action, string context, bool continueOnError = false)
+        {
+            try
+            {
+                await action();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                HandleException(ex, context);
+
+                if (!continueOnError)
+                {
+                    throw;
+                }
+
+                return false;
+            }
+        }
+
         private void HandleNotificationException(NotificationException exception, string context, string exceptionId)
         {
             _logger.LogError(
@@ -48,33 +68,6 @@ namespace FCG.Notifications.Infrastructure.ExceptionHandlers
                 context,
                 exception.Message,
                 exception.StackTrace);
-        }
-
-        public async Task<bool> TryExecuteAsync(Func<Task> action, string context, bool continueOnError = false)
-        {
-            try
-            {
-                await action();
-                return true;
-            }
-            catch (Exception ex)
-            {
-                HandleException(ex, context);
-
-                if (!continueOnError)
-                {
-                    throw;
-                }
-
-                return false;
-            }
-        }
-
-        public bool ShouldCommitMessage(Exception exception)
-        {
-            // Commit messages that failed due to deserialization issues (poison messages)
-            // Don't commit messages that failed due to transient errors (email service, etc)
-            return exception is EventDeserializationException;
         }
     }
 }
