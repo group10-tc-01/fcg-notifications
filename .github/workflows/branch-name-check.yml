@@ -1,4 +1,4 @@
-﻿﻿name: Check Branch Name
+﻿name: Check Branch Name
 
 on:
   pull_request_target:
@@ -37,7 +37,7 @@ jobs:
 
             Examples:
             - feature/add-new-component
-            - release/v1.0.0
+            - release/v0.0.1
             - hotfix/critical-bug-fix
             `;
             await github.rest.issues.createComment({
