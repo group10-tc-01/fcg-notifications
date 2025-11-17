@@ -1,4 +1,4 @@
-﻿﻿name: Check Branch Name
+﻿name: Check Branch Name
 
 on:
   pull_request_target:
