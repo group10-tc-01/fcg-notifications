@@ -20,14 +20,14 @@ namespace FCG.Notifications.Infrastructure.EventHandlers
 
         public async Task HandleAsync(UserCreatedEvent eventData, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Processing UserCreatedEvent for {Email}", eventData.UserEmail);
+            _logger.LogInformation("Processing UserCreatedEvent for {Email}", eventData.Email);
 
             await _emailService.SendUserCreatedEmailAsync(
-                eventData.UserName,
-                eventData.UserEmail,
+                eventData.Name,
+                eventData.Email,
                 cancellationToken);
 
-            _logger.LogInformation("Successfully sent welcome email to {Email}", eventData.UserEmail);
+            _logger.LogInformation("Successfully sent welcome email to {Email}", eventData.Email);
         }
     }
 }
