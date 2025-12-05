@@ -55,3 +55,9 @@ nunit-*.xml
 
 .vs
 /src/FCG.Notifications.WebApi/FCG.Notifications.WebApi.csproj.user
+
+appsettings.Development.json
+
+# Kubernetes Secrets - NEVER commit these files
+k8s/**/secret-*.yaml
+!k8s/**/secret-*.yaml.example
