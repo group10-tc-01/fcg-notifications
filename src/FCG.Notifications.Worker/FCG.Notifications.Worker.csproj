@@ -12,6 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FCG.Notifications.Infrastructure\FCG.Notifications.Infrastructure.csproj" />
+    <ProjectReference Include="..\FCG.Notifications.Application\FCG.Notifications.Application.csproj" />
   </ItemGroup>
 </Project>

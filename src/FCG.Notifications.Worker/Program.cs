@@ -1,4 +1,4 @@
-using FCG.Notifications.Infrastructure.DependencyInjection;
+using FCG.Notifications.Application.DependencyInjection;
 
 namespace FCG.Notifications.Worker
 {
@@ -16,7 +16,7 @@ namespace FCG.Notifications.Worker
             return Host.CreateDefaultBuilder(args)
                    .ConfigureServices((hostContext, services) =>
                    {
-                       services.AddInfrastructure(hostContext.Configuration);
+                       services.AddApplication(hostContext.Configuration);
                    });
         }
     }
