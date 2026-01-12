@@ -54,7 +54,7 @@ jobs:
         IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
         
         docker build \
-          --file src/FCG.Users.WebApi/Dockerfile \
+          --file src/FCG.Notifications.Worker/Dockerfile \
           --build-arg BUILD_CONFIGURATION=Release \
           -t ${IMAGE}:${{ steps.version.outputs.version }} \
           -t ${IMAGE}:latest \
