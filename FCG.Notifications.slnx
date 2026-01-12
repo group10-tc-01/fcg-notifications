@@ -1,7 +1,6 @@
 <Solution>
   <Folder Name="/src/">
-    <Project Path="src/FCG.Notifications.Domain/FCG.Notifications.Domain.csproj" />
-    <Project Path="src/FCG.Notifications.Infrastructure/FCG.Notifications.Infrastructure.csproj" />
+    <Project Path="src/FCG.Notifications.Application/FCG.Notifications.Application.csproj" Id="a82c47ef-7491-447d-9a93-e79b190e3fd2" />
     <Project Path="src/FCG.Notifications.Worker/FCG.Notifications.Worker.csproj" />
   </Folder>
 </Solution>
