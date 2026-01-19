@@ -27,7 +27,7 @@ namespace FCG.Notifications.Application.Features.PaymentProcessed
             {
                 _logger.LogInformation("Processing PaymentProcessedEvent for {Email}", @event.UserEmail);
 
-                await emailService.SendPaymentProcessedEmailAsync(@event.UserEmail, @event.IsSuccessful, cancellationToken);
+                await emailService.SendPaymentProcessedEmailAsync(@event.UserEmail, @event.Status, cancellationToken);
 
                 _logger.LogInformation("Successfully sent payment processed email to {Email}", @event.UserEmail);
             }
